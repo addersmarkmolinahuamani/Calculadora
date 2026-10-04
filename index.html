@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Prime - Inspirada en HP Prime</title>
+  <meta name="description" content="Calculadora práctica y elegante con diseño inspirado en la legendaria HP Prime. Operaciones básicas, historial interactivo y sonido táctil.">
+  <meta name="theme-color" content="#1f232b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HP Prime">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="calculator-wrapper">
+    <!-- CALCULADORA HP PRIME CHASSIS -->
+    <main class="hp-calculator" id="calculator" role="region" aria-label="Calculadora estilo HP Prime">
+      
+      <!-- Top Bevel & Metallic Logo Header -->
+      <header class="calculator-header">
+        <div class="brand-badge">
+          <div class="hp-logo-circle" aria-hidden="true">
+            <span class="hp-letters">hp</span>
+          </div>
+          <div class="model-info">
+            <span class="model-name">PRIME</span>
+            <span class="model-sub">BASIC EDITION</span>
+          </div>
+        </div>
+        <div class="header-decorations">
+          <div class="status-led" id="status-led" title="Calculadora encendida" aria-label="Indicador de energía activo"></div>
+          <div class="chassis-screw screw-top-right" aria-hidden="true"></div>
+        </div>
+      </header>
+
+      <!-- LCD SCREEN CONTAINER -->
+      <section class="screen-frame" aria-label="Pantalla LCD">
+        <div class="screen-inner">
+          
+          <!-- Top Status Bar (Authentic HP Prime layout) -->
+          <div class="status-bar" id="status-bar">
+            <div class="status-left">
+              <span class="badge badge-mode" id="mode-badge" title="Modo estándar">HOME</span>
+              <button type="button" class="badge badge-btn" id="btn-toggle-angle" title="Cambiar DEG / RAD">DEG</button>
+            </div>
+            
+            <div class="status-center">
+              <span class="system-time" id="system-time">12:00</span>
+            </div>
+
+            <div class="status-right">
+              <button type="button" class="status-icon-btn" id="btn-toggle-sound" title="Alternar sonido de teclas" aria-label="Activar o desactivar sonido">
+                <svg id="sound-icon-on" class="icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+                <svg id="sound-icon-off" class="icon-svg hidden" viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                  <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                </svg>
+              </button>
+              
+              <button type="button" class="status-icon-btn" id="btn-copy-result" title="Copiar resultado" aria-label="Copiar resultado al portapapeles">
+                <svg class="icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                  <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                </svg>
+              </button>
+
+              <div class="battery-indicator" id="battery-indicator" title="Batería: 100%">
+                <div class="battery-body">
+                  <div class="battery-level" id="battery-level"></div>
+                </div>
+                <div class="battery-tip"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- History / Calculation Stack (Scrollable roll) -->
+          <div class="calc-stack-container" id="stack-container" role="log" aria-label="Historial de cálculos">
+            <div class="stack-list" id="stack-list">
+              <!-- Historial items generated dynamically -->
+              <div class="stack-empty-notice" id="stack-empty-notice">
+                <span>HP PRIME STACK • HISTORIAL DISPONIBLE</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current Math Line & Dynamic Result -->
+          <div class="calc-active-display">
+            <!-- Active Expression line -->
+            <div class="display-expression-wrapper">
+              <span class="expression-prompt">&gt;</span>
+              <div class="display-expression" id="display-expression" aria-live="polite">0</div>
+            </div>
+            
+            <!-- Live Preview / Final Result Line -->
+            <div class="display-result-wrapper">
+              <div class="result-left-meta">
+                <span class="preview-label" id="preview-label"></span>
+                <span class="badge-frac-mode hidden" id="badge-frac-mode">FRAC</span>
+              </div>
+              <div class="display-result" id="display-result" aria-live="polite">0</div>
+            </div>
+          </div>
+
+          <!-- HP Prime Bottom Touch Softkeys -->
+          <div class="screen-softkeys" role="toolbar" aria-label="Teclas rápidas de pantalla">
+            <button type="button" class="softkey-btn" id="soft-clear-hist" title="Limpiar todo el historial">LIMPIAR</button>
+            <button type="button" class="softkey-btn" id="soft-frac" title="Plantilla de Fracción">□ / □</button>
+            <button type="button" class="softkey-btn" id="soft-sqrt" title="Plantilla de Raíz">ⁿ√□</button>
+            <button type="button" class="softkey-btn" id="soft-power" title="Plantilla de Potencia">□^□</button>
+            <button type="button" class="softkey-btn" id="soft-copy" title="Copiar resultado">COPIAR</button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- KEYPAD SECTION -->
+      <section class="keypad-chassis" aria-label="Teclado numérico y operaciones">
+        
+        <!-- Top Utility Row (5 botones estándar de utilidad) -->
+        <div class="keypad-row utility-row">
+          <button type="button" class="key-btn key-utility key-clear" id="key-clear" data-action="clear" aria-label="Borrar todo">
+            <span class="key-main">AC</span>
+          </button>
+          
+          <button type="button" class="key-btn key-utility key-delete" id="key-delete" data-action="backspace" aria-label="Borrar último carácter">
+            <span class="key-main">DEL</span>
+          </button>
+          
+          <button type="button" class="key-btn key-utility" id="key-paren-open" data-key="(" aria-label="Paréntesis que abre">
+            <span class="key-main">(</span>
+          </button>
+          
+          <button type="button" class="key-btn key-utility" id="key-paren-close" data-key=")" aria-label="Paréntesis que cierra">
+            <span class="key-main">)</span>
+          </button>
+
+          <button type="button" class="key-btn key-utility key-operator" id="key-percent" data-action="percent" aria-label="Porcentaje">
+            <span class="key-main">%</span>
+          </button>
+        </div>
+
+        <!-- Main Numerical & Operation Grid -->
+        <div class="keypad-main-grid">
+          
+          <!-- Row 1 -->
+          <button type="button" class="key-btn key-num" id="key-7" data-key="7">
+            <span class="key-main">7</span>
+          </button>
+          <button type="button" class="key-btn key-num" id="key-8" data-key="8">
+            <span class="key-main">8</span>
+          </button>
+          <button type="button" class="key-btn key-num" id="key-9" data-key="9">
+            <span class="key-main">9</span>
+          </button>
+          <button type="button" class="key-btn key-operator" id="key-divide" data-key="/" aria-label="Dividir">
+            <span class="key-main">÷</span>
+          </button>
+
+          <!-- Row 2 -->
+          <button type="button" class="key-btn key-num" id="key-4" data-key="4">
+            <span class="key-main">4</span>
+          </button>
+          <button type="button" class="key-btn key-num" id="key-5" data-key="5">
+            <span class="key-main">5</span>
+          </button>
+          <button type="button" class="key-btn key-num" id="key-6" data-key="6">
+            <span class="key-main">6</span>
+          </button>
+          <button type="button" class="key-btn key-operator" id="key-multiply" data-key="*" aria-label="Multiplicar">
+            <span class="key-main">×</span>
+          </button>
+
+          <!-- Row 3 -->
+          <button type="button" class="key-btn key-num" id="key-1" data-key="1">
+            <span class="key-main">1</span>
+          </button>
+          <button type="button" class="key-btn key-num" id="key-2" data-key="2">
+            <span class="key-main">2</span>
+          </button>
+          <button type="button" class="key-btn key-num" id="key-3" data-key="3">
+            <span class="key-main">3</span>
+          </button>
+          <button type="button" class="key-btn key-operator" id="key-subtract" data-key="-" aria-label="Restar">
+            <span class="key-main">−</span>
+          </button>
+
+          <!-- Row 4 -->
+          <button type="button" class="key-btn key-num" id="key-0" data-key="0">
+            <span class="key-main">0</span>
+          </button>
+          <button type="button" class="key-btn key-num" id="key-dot" data-key="." aria-label="Punto decimal">
+            <span class="key-main">.</span>
+          </button>
+          <button type="button" class="key-btn key-num" id="key-sign" data-action="sign" aria-label="Cambiar signo">
+            <span class="key-main">±</span>
+          </button>
+          <button type="button" class="key-btn key-operator" id="key-add" data-key="+" aria-label="Sumar">
+            <span class="key-main">+</span>
+          </button>
+
+        </div>
+
+        <!-- Bottom Action Bar: Fraction (□/□), Root (ⁿ√□), Power (□^□) & Large HP Enter Button -->
+        <div class="keypad-bottom-row">
+          <button type="button" class="key-btn key-num key-action-fn key-template-btn" id="key-frac" data-action="fraction" title="Plantilla Fracción [ □ / □ ]" aria-label="Fracción con casillas punteadas">
+            <svg class="template-btn-icon" viewBox="0 0 28 32" width="22" height="25" fill="none" stroke="currentColor">
+              <rect x="7" y="2" width="14" height="11" rx="1.5" stroke-width="1.8" stroke-dasharray="2.5,2"/>
+              <line x1="2" y1="16" x2="26" y2="16" stroke-width="2" stroke-linecap="round"/>
+              <rect x="7" y="19" width="14" height="11" rx="1.5" stroke-width="1.8" stroke-dasharray="2.5,2"/>
+            </svg>
+          </button>
+
+          <button type="button" class="key-btn key-num key-action-fn key-template-btn" id="key-sqrt" data-action="sqrt" title="Plantilla Raíz [ ⁿ√□ ]" aria-label="Raíz con casillas punteadas para índice y radicando">
+            <svg class="template-btn-icon" viewBox="0 0 34 30" width="26" height="23" fill="none" stroke="currentColor">
+              <rect x="1" y="2" width="9" height="9" rx="1" stroke-width="1.5" stroke-dasharray="2,1.5"/>
+              <path d="M 8 17 L 12 25 L 16 5 L 32 5" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="17" y="9" width="14" height="15" rx="1.5" stroke-width="1.7" stroke-dasharray="2.2,1.8"/>
+            </svg>
+          </button>
+
+          <button type="button" class="key-btn key-num key-action-fn key-template-btn" id="key-power" data-action="power" title="Plantilla Potencia [ □^□ ]" aria-label="Potencia con casillas punteadas para base y exponente">
+            <svg class="template-btn-icon" viewBox="0 0 30 30" width="24" height="24" fill="none" stroke="currentColor">
+              <rect x="2" y="11" width="15" height="16" rx="1.5" stroke-width="1.8" stroke-dasharray="2.5,2"/>
+              <rect x="19" y="3" width="9" height="10" rx="1" stroke-width="1.5" stroke-dasharray="2,1.5"/>
+            </svg>
+          </button>
+          
+          <button type="button" class="key-btn key-enter" id="key-enter" data-action="evaluate" aria-label="Calcular resultado (Enter)">
+            <span class="key-enter-main">ENTER</span>
+          </button>
+        </div>
+
+      </section>
+
+      <!-- Bottom Chassis Screw & Model Trim -->
+      <footer class="calculator-footer">
+        <div class="chassis-screw screw-bottom-left" aria-hidden="true"></div>
+        <div class="footer-engraving">HEWLETT-PACKARD ARCHITECTURE • HIGH PRECISION</div>
+        <div class="chassis-screw screw-bottom-right" aria-hidden="true"></div>
+      </footer>
+
+    </main>
+
+    <!-- Side Quick Keyboard Reference & Features Card -->
+    <aside class="quick-guide-panel" aria-label="Guía rápida y atajos">
+      <div class="guide-header">
+        <span class="guide-icon">⌨️</span>
+        <h3>Atajos de Teclado</h3>
+      </div>
+      <ul class="shortcuts-list">
+        <li><kbd>0</kbd>–<kbd>9</kbd> y <kbd>.</kbd> <span>Números y coma decimal</span></li>
+        <li><kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd> <span>Operaciones básicas</span></li>
+        <li><kbd>Enter</kbd> o <kbd>=</kbd> <span>Calcular resultado</span></li>
+        <li><kbd>Backspace</kbd> <span>Borrar un dígito</span></li>
+        <li><kbd>Esc</kbd> o <kbd>C</kbd> <span>Borrar todo (AC)</span></li>
+        <li><kbd>(</kbd> y <kbd>)</kbd> <span>Paréntesis para orden de operaciones</span></li>
+        <li><kbd>%</kbd> <span>Calcular porcentaje</span></li>
+        <li><kbd>F</kbd> o botón <kbd>□/□</kbd> <span>Plantilla de fracción</span></li>
+        <li><kbd>R</kbd> o botón <kbd>ⁿ√□</kbd> <span>Plantilla de raíz (índice y radicando)</span></li>
+        <li><kbd>^</kbd> o botón <kbd>□^□</kbd> <span>Plantilla de potencia (base y exponente)</span></li>
+        <li><kbd>↓</kbd> / <kbd>↑</kbd> / <kbd>←</kbd> / <kbd>→</kbd> <span>Navegar entre recuadros</span></li>
+        <li><kbd>Tab</kbd> o clic en pantalla <span>Avanzar recuadro o salir</span></li>
+      </ul>
+
+      <div class="guide-feature-box">
+        <div class="feature-title">📐 Plantillas Visuales HP Prime (Textbook Math)</div>
+        <p>Al pulsar <strong>Fracción</strong>, <strong>Raíz</strong> o <strong>Potencia</strong> aparecen los recuadros punteados en pantalla. Escribe números u operaciones en cada recuadro, muévete con las flechas o haciendo clic, y pulsa <kbd>ENTER</kbd> para calcular.</p>
+      </div>
+
+      <div class="guide-feature-box">
+        <div class="feature-title">✨ Pila HP Prime (Stack)</div>
+        <p>Haz clic en cualquier cálculo o resultado anterior de la pantalla para reinsertarlo en tu operación actual al instante.</p>
+      </div>
+
+      <div class="guide-footer-badge">
+        <span>Diseñado con pasión para cálculo rápido y confiable.</span>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-notification" id="toast-notification" role="status" aria-live="polite">
+    <span class="toast-message" id="toast-message">Copiado al portapapeles</span>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1440 @@
+/* ==========================================================================
+   CALCULADORA PRIME - INSPIRADA EN HP PRIME
+   Estilo: Classic Hardware Premium (Aluminio cepillado, Pantalla LCD & Teclado Táctil)
+   ========================================================================== */
+
+:root {
+  /* Paleta Hardware HP Prime */
+  --chassis-bg-base: #1f232b;
+  --chassis-metal-light: #323846;
+  --chassis-metal-dark: #16181f;
+  --bezel-border: #0d0f13;
+  --aluminum-sheen: rgba(255, 255, 255, 0.08);
+
+  /* Acentos de Marca HP Prime */
+  --hp-blue: #0077c8;
+  --hp-blue-hover: #0091ea;
+  --hp-blue-glow: rgba(0, 119, 200, 0.35);
+  --hp-cyan: #00e5ff;
+  --hp-orange: #ff9100;
+  --hp-coral: #ff5252;
+  --hp-green: #00e676;
+
+  /* Pantalla LCD Color */
+  --screen-bg: #0c1017;
+  --screen-card-bg: rgba(18, 24, 38, 0.85);
+  --screen-border: #1e283d;
+  --screen-text-primary: #f0f6fc;
+  --screen-text-secondary: #8b9bb4;
+  --screen-expression: #e2e8f0;
+  --screen-result: #38bdf8;
+  --screen-result-glow: rgba(56, 189, 248, 0.25);
+  --screen-softkey-bg: #151b27;
+  --screen-softkey-border: #243048;
+
+  /* Teclas Numéricas (Blanco/Plata perla) */
+  --key-num-bg: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  --key-num-text: #0f172a;
+  --key-num-shadow: #94a3b8;
+  --key-num-active: #cbd5e1;
+
+  /* Teclas de Operación (Grafito oscuro) */
+  --key-op-bg: linear-gradient(180deg, #2a313d 0%, #1e232c 100%);
+  --key-op-text: #f1f5f9;
+  --key-op-shadow: #12151b;
+  --key-op-border: #384252;
+
+  /* Teclas de Utilidad (Clear / Delete) */
+  --key-util-bg: linear-gradient(180deg, #333d4b 0%, #222933 100%);
+  --key-clear-text: #ff6b6b;
+  --key-del-text: #fbbf24;
+
+  /* Tipografía */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, Menlo, monospace;
+
+  /* Radios & Sombras */
+  --radius-chassis: 28px;
+  --radius-screen: 14px;
+  --radius-key: 8px;
+}
+
+/* ==========================================================================
+   RESET & LAYOUT BASE
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: radial-gradient(circle at 50% 20%, #1a1e29 0%, #0d0f14 100%);
+  color: #e2e8f0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  overflow-x: hidden;
+}
+
+.calculator-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 32px;
+  max-width: 960px;
+  width: 100%;
+}
+
+/* ==========================================================================
+   CHASSIS HP PRIME (CUERPO METÁLICO)
+   ========================================================================== */
+.hp-calculator {
+  width: 100%;
+  max-width: 440px;
+  background: 
+    linear-gradient(145deg, var(--chassis-metal-light) 0%, var(--chassis-bg-base) 40%, var(--chassis-metal-dark) 100%);
+  border-radius: var(--radius-chassis);
+  padding: 20px 22px 24px 22px;
+  position: relative;
+  box-shadow: 
+    0 25px 60px -12px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset,
+    0 2px 4px rgba(255, 255, 255, 0.18) inset,
+    0 10px 20px -5px rgba(0, 0, 0, 0.5);
+  border: 2px solid var(--bezel-border);
+  user-select: none;
+}
+
+/* Acabado cepillado sutil con pseudo-elemento */
+.hp-calculator::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-chassis);
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    rgba(255, 255, 255, 0.015) 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* ==========================================================================
+   CABECERA & LOGO HP
+   ========================================================================== */
+.calculator-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding: 0 4px;
+}
+
+.brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hp-logo-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0091ea 0%, #005a9e 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+}
+
+.hp-letters {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-style: italic;
+  font-size: 19px;
+  color: #ffffff;
+  letter-spacing: -1.5px;
+  transform: translateY(-1px) translateX(-0.5px);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.model-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.model-name {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  color: #f1f5f9;
+  line-height: 1.1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.model-sub {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--hp-cyan);
+  text-transform: uppercase;
+}
+
+.header-decorations {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* LED de Estado */
+.status-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--hp-green);
+  box-shadow: 0 0 8px 1px var(--hp-green);
+  transition: all 0.3s ease;
+}
+
+/* Tornillos del chasis */
+.chassis-screw {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #94a3b8 0%, #334155 70%, #0f172a 100%);
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  position: relative;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.chassis-screw::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 1.5px;
+  background-color: #1e293b;
+  transform: translate(-50%, -50%) rotate(42deg);
+}
+
+/* ==========================================================================
+   PANTALLA LCD (HP PRIME DISPLAY)
+   ========================================================================== */
+.screen-frame {
+  background: #06080c;
+  border-radius: var(--radius-screen);
+  padding: 8px;
+  border: 2px solid #202738;
+  box-shadow: 
+    inset 0 4px 12px rgba(0, 0, 0, 0.8),
+    0 1px 1px rgba(255, 255, 255, 0.08);
+  margin-bottom: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Brillo sutil de cristal en la pantalla */
+.screen-frame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, transparent 100%);
+  pointer-events: none;
+  border-radius: var(--radius-screen) var(--radius-screen) 0 0;
+}
+
+.screen-inner {
+  background: var(--screen-bg);
+  border-radius: 9px;
+  border: 1px solid var(--screen-border);
+  display: flex;
+  flex-direction: column;
+  min-height: 290px;
+  position: relative;
+}
+
+/* Barra de Estado Superior */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: rgba(15, 22, 35, 0.95);
+  border-bottom: 1px solid var(--screen-border);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.status-left, .status-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.badge-mode {
+  background: #1e3a5f;
+  color: #60a5fa;
+  border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+.badge-btn {
+  background: #1e293b;
+  color: var(--hp-orange);
+  border: 1px solid rgba(255, 145, 0, 0.35);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.badge-btn:hover {
+  background: rgba(255, 145, 0, 0.15);
+  border-color: var(--hp-orange);
+}
+
+.system-time {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.status-icon-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 4px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.status-icon-btn:hover {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+}
+
+.status-icon-btn svg {
+  display: block;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Indicador de Batería */
+.battery-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.battery-body {
+  width: 17px;
+  height: 9px;
+  border: 1px solid #94a3b8;
+  border-radius: 2px;
+  padding: 1px;
+  display: flex;
+}
+
+.battery-level {
+  width: 100%;
+  height: 100%;
+  background: var(--hp-green);
+  border-radius: 1px;
+  transition: width 0.3s ease;
+}
+
+.battery-tip {
+  width: 2px;
+  height: 4px;
+  background: #94a3b8;
+  border-radius: 0 1px 1px 0;
+  margin-left: 1px;
+}
+
+/* ==========================================================================
+   PILA / HISTORIAL HP PRIME (STACK)
+   ========================================================================== */
+.calc-stack-container {
+  flex: 1;
+  max-height: 170px;
+  min-height: 125px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column-reverse; /* El más reciente queda visible */
+  scrollbar-width: thin;
+  scrollbar-color: #243048 transparent;
+}
+
+.calc-stack-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.calc-stack-container::-webkit-scrollbar-thumb {
+  background-color: #243048;
+  border-radius: 4px;
+}
+
+.stack-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.stack-empty-notice {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: #475569;
+  letter-spacing: 1px;
+  text-align: center;
+  padding: 14px 0;
+}
+
+.stack-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.stack-row:hover {
+  background: rgba(0, 119, 200, 0.12);
+  border-color: rgba(0, 119, 200, 0.35);
+  transform: translateX(2px);
+}
+
+.stack-index {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #64748b;
+  margin-right: 8px;
+  user-select: none;
+}
+
+.stack-expr {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #94a3b8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+}
+
+.stack-result {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--hp-cyan);
+  text-align: right;
+  margin-left: auto;
+}
+
+/* ==========================================================================
+   VISOR ACTIVO: EXPRESIÓN Y RESULTADO
+   ========================================================================== */
+.calc-active-display {
+  padding: 10px 14px;
+  background: linear-gradient(180deg, rgba(16, 22, 34, 0.9) 0%, rgba(10, 14, 23, 0.95) 100%);
+  border-top: 1px solid var(--screen-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.display-expression-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #243048 transparent;
+  min-height: 74px;
+  padding: 6px 0;
+}
+
+.display-expression-wrapper::-webkit-scrollbar {
+  height: 3px;
+}
+
+.display-expression-wrapper::-webkit-scrollbar-thumb {
+  background-color: #243048;
+  border-radius: 3px;
+}
+
+.expression-prompt {
+  font-family: var(--font-mono);
+  color: var(--hp-orange);
+  font-weight: 700;
+  font-size: 15px;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.display-expression {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--screen-expression);
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  width: 100%;
+}
+
+/* ==========================================================================
+   PLANTILLA VISUAL DE FRACCIÓN (HP PRIME TEXTBOOK MATH)
+   ========================================================================== */
+.math-text-token {
+  display: inline-flex;
+  align-items: center;
+  white-space: pre;
+}
+
+/* Bloque vertical de fracción con numerador y denominador */
+.math-fraction-block {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin: 0 4px;
+  padding: 2px 5px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.math-fraction-block.has-focus {
+  border-color: var(--hp-cyan);
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.25), inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Casillas interactivas de Numerador y Denominador */
+.frac-slot {
+  min-width: 24px;
+  min-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1.5px dashed transparent;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #f1f5f9;
+  transition: all 0.12s ease;
+}
+
+.frac-slot:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Casilla vacía con recuadro punteado estilo HP Prime */
+.frac-slot.is-empty {
+  border: 1.5px dashed rgba(148, 163, 184, 0.55);
+  color: #64748b;
+  min-width: 26px;
+}
+
+/* Casilla con el foco activo para escribir */
+.frac-slot.is-active {
+  border: 1.5px solid var(--hp-cyan) !important;
+  background: rgba(0, 229, 255, 0.18) !important;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.45) !important;
+  color: #ffffff !important;
+}
+
+/* Barra horizontal de división de la fracción */
+.frac-divider-bar {
+  width: 100%;
+  min-width: 26px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #38bdf8 15%, #38bdf8 85%, transparent);
+  margin: 2px 0;
+  border-radius: 1px;
+}
+
+/* ==========================================================================
+   PLANTILLA VISUAL DE POTENCIA (BASE Y EXPONENTE EN RECUADROS PUNTEADOS)
+   ========================================================================== */
+.math-power-block {
+  display: inline-flex;
+  align-items: flex-start;
+  vertical-align: middle;
+  margin: 0 4px;
+  padding: 2px 5px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.math-power-block.has-focus {
+  border-color: var(--hp-cyan);
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.25), inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.power-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  border: 1.5px dashed transparent;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: #f1f5f9;
+  transition: all 0.12s ease;
+  padding: 1px 5px;
+}
+
+.power-slot.power-base {
+  min-width: 24px;
+  min-height: 24px;
+  font-size: 16px;
+}
+
+.power-slot.power-exp {
+  min-width: 18px;
+  min-height: 18px;
+  font-size: 11.5px;
+  margin-top: -6px;
+  margin-left: 2px;
+  padding: 0 3px;
+}
+
+.power-slot:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.power-slot.is-empty {
+  border: 1.5px dashed rgba(148, 163, 184, 0.55);
+  color: #64748b;
+}
+
+.power-slot.is-active {
+  border: 1.5px solid var(--hp-cyan) !important;
+  background: rgba(0, 229, 255, 0.18) !important;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.45) !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   PLANTILLA VISUAL DE RAÍZ (ÍNDICE Y RADICANDO EN RECUADROS PUNTEADOS)
+   ========================================================================== */
+.math-radical-block {
+  display: inline-flex;
+  align-items: flex-end;
+  vertical-align: middle;
+  margin: 0 4px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.math-radical-block.has-focus {
+  border-color: var(--hp-cyan);
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.25), inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.radical-index-container {
+  display: inline-flex;
+  align-items: flex-start;
+  margin-right: -2px;
+  margin-bottom: 12px;
+}
+
+.radical-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  border: 1.5px dashed transparent;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: #f1f5f9;
+  transition: all 0.12s ease;
+}
+
+.radical-slot.radical-index {
+  min-width: 17px;
+  min-height: 17px;
+  font-size: 10.5px;
+  padding: 0 2px;
+}
+
+.radical-body {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.radical-sign-glyph {
+  display: inline-flex;
+  align-items: stretch;
+  color: #38bdf8;
+  padding-bottom: 0;
+}
+
+.radical-svg {
+  width: 14px;
+  height: 100%;
+  min-height: 26px;
+  display: block;
+}
+
+.radical-radicand-wrapper {
+  display: inline-flex;
+  align-items: center;
+  border-top: 2px solid #38bdf8;
+  padding-top: 2px;
+  margin-top: 2px;
+}
+
+.radical-slot.radical-radicand {
+  min-width: 26px;
+  min-height: 24px;
+  font-size: 15px;
+  padding: 1px 5px;
+}
+
+/* Soporte para bloques anidados dentro de recuadros */
+.frac-slot > .math-radical-block,
+.frac-slot > .math-power-block,
+.frac-slot > .math-fraction-block,
+.power-slot > .math-radical-block,
+.power-slot > .math-power-block,
+.power-slot > .math-fraction-block,
+.radical-slot > .math-radical-block,
+.radical-slot > .math-power-block,
+.radical-slot > .math-fraction-block {
+  margin: 1px 2px;
+  background: rgba(10, 15, 26, 0.85);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.radical-slot:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.radical-slot.is-empty {
+  border: 1.5px dashed rgba(148, 163, 184, 0.55);
+  color: #64748b;
+}
+
+.radical-slot.is-active {
+  border: 1.5px solid var(--hp-cyan) !important;
+  background: rgba(0, 229, 255, 0.18) !important;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.45) !important;
+  color: #ffffff !important;
+}
+
+/* Cursor parpadeante */
+.cursor-blink {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background-color: var(--hp-orange);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blinkCursor 0.9s infinite;
+  box-shadow: 0 0 5px var(--hp-orange);
+}
+
+@keyframes blinkCursor {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Recuadro de plantilla vacía */
+.box-prompt {
+  font-size: 11px;
+  color: #64748b;
+  pointer-events: none;
+  font-weight: 400;
+}
+
+.display-result-wrapper {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.result-left-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.preview-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+.badge-frac-mode {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+}
+
+.display-result {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--screen-result);
+  text-align: right;
+  width: 100%;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  text-shadow: 0 0 16px var(--screen-result-glow);
+  transition: color 0.15s ease;
+}
+
+.display-result::-webkit-scrollbar {
+  display: none;
+}
+
+.display-result.error-state {
+  color: var(--hp-coral);
+  font-size: 18px;
+  text-shadow: none;
+}
+
+/* ==========================================================================
+   TECLAS RÁPIDAS DE PANTALLA (TOUCH SOFTKEYS HP PRIME)
+   ========================================================================== */
+.screen-softkeys {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: #0f1520;
+  border-top: 1px solid var(--screen-border);
+  padding: 4px;
+  gap: 3px;
+}
+
+.softkey-btn {
+  background: var(--screen-softkey-bg);
+  border: 1px solid var(--screen-softkey-border);
+  color: #94a3b8;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 6px 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s ease;
+  letter-spacing: 0.5px;
+}
+
+.softkey-btn:hover {
+  background: #1e293b;
+  color: #f1f5f9;
+  border-color: #38bdf8;
+}
+
+.softkey-btn:active {
+  background: #0284c7;
+  color: #ffffff;
+  transform: translateY(1px);
+}
+
+/* ==========================================================================
+   CHASSIS DE BOTONERA & TECLAS FÍSICAS
+   ========================================================================== */
+.keypad-chassis {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Botón Base */
+.key-btn {
+  border: none;
+  border-radius: var(--radius-key);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.08s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.08s ease, filter 0.08s ease;
+  outline: none;
+}
+
+.key-btn:focus-visible {
+  outline: 2px solid var(--hp-cyan);
+  outline-offset: 2px;
+}
+
+/* Texto Principal de la Tecla */
+.key-main {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   ESTILOS ESPECÍFICOS POR TIPO DE TECLA
+   ========================================================================== */
+
+/* 1. Teclas Numéricas (Blanco Marfil / Plata) */
+.key-num {
+  background: var(--key-num-bg);
+  color: var(--key-num-text);
+  height: 42px;
+  box-shadow: 
+    0 3px 0 var(--key-num-shadow),
+    0 5px 7px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.key-num .key-main {
+  font-weight: 700;
+  font-size: 22px;
+  color: #0f172a;
+}
+
+.key-num:hover {
+  filter: brightness(1.05);
+}
+
+.key-num:active, .key-num.active-press {
+  transform: translateY(3px);
+  box-shadow: 
+    0 1px 0 var(--key-num-shadow),
+    0 2px 4px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px #ffffff;
+}
+
+/* 2. Teclas Operadoras (+, -, ×, ÷) */
+.key-operator {
+  background: var(--key-op-bg);
+  color: var(--key-op-text);
+  height: 42px;
+  box-shadow: 
+    0 3px 0 var(--key-op-shadow),
+    0 5px 7px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--key-op-border);
+}
+
+.key-operator .key-main {
+  font-size: 22px;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.key-operator:hover {
+  filter: brightness(1.15);
+  border-color: #4b5563;
+}
+
+.key-operator:active, .key-operator.active-press {
+  transform: translateY(2px);
+  box-shadow: 
+    0 1px 0 var(--key-op-shadow),
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* 3. Fila Superior de Utilidad (AC, DEL, (, ), %) */
+.utility-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+/* ==========================================================================
+   TECLA DE FRACCIÓN PURA (SÓLO EL SÍMBOLO [ □ / □ ], EXACTA A LA IMAGEN 1)
+   ========================================================================== */
+.key-pure-frac {
+  background: var(--key-num-bg);
+  border: 1.5px solid #0f172a;
+  border-radius: var(--radius-key);
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 3px 0 var(--key-num-shadow),
+    0 5px 6px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px #ffffff;
+  cursor: pointer;
+  user-select: none;
+}
+
+.key-pure-frac:hover {
+  filter: brightness(1.08);
+}
+
+.key-pure-frac:active, .key-pure-frac.active-press {
+  transform: translateY(2px);
+  box-shadow: 
+    0 1px 0 var(--key-num-shadow),
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px #ffffff;
+}
+
+/* Símbolo vertical de fracción: caja punteada sobre caja punteada */
+.pure-frac-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5px;
+  pointer-events: none;
+}
+
+.pure-dash-box {
+  display: inline-block;
+  width: 12px;
+  height: 8.5px;
+  border: 1.5px dashed #0f172a;
+  border-radius: 1.5px;
+  background: transparent;
+}
+
+.pure-frac-bar {
+  width: 16px;
+  height: 2px;
+  background-color: #0f172a;
+  border-radius: 0.5px;
+}
+
+.key-utility {
+  background: var(--key-util-bg);
+  color: #cbd5e1;
+  height: 38px;
+  box-shadow: 
+    0 3px 0 #13171e,
+    0 4px 5px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  border: 1px solid #334155;
+}
+
+.key-utility .key-main {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.key-clear .key-main {
+  color: var(--key-clear-text);
+  font-weight: 800;
+}
+
+.key-delete .key-main {
+  color: var(--key-del-text);
+  font-weight: 800;
+}
+
+.key-utility:hover {
+  filter: brightness(1.12);
+}
+
+.key-utility:active, .key-utility.active-press {
+  transform: translateY(2px);
+  box-shadow: 
+    0 1px 0 #13171e,
+    0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Cuadrícula Principal (4 Columnas: 3 Números + 1 Operador) */
+.keypad-main-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+/* 4. Fila Inferior: Fracción, Raíz, Potencia y Botón ENTER Gigante HP */
+.keypad-bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 2.3fr;
+  gap: 8px;
+  margin-top: 0;
+}
+
+.key-template-btn {
+  background: var(--key-num-bg);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: var(--key-num-text);
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 3px 0 var(--key-num-shadow),
+    0 5px 7px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px #ffffff;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.key-template-btn:hover {
+  filter: brightness(1.08);
+}
+
+.key-template-btn:active, .key-template-btn.active-press {
+  transform: translateY(3px);
+  box-shadow: 
+    0 1px 0 var(--key-num-shadow),
+    0 2px 4px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px #ffffff;
+}
+
+.template-btn-icon {
+  display: block;
+  color: #0f172a;
+  pointer-events: none;
+  transition: transform 0.08s ease;
+}
+
+/* Potencia xʸ (Fiel a la imagen 2) */
+.math-symbol-power {
+  font-family: var(--font-sans);
+  font-size: 19px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.math-symbol-power i {
+  font-style: italic;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.math-symbol-power sup {
+  font-size: 13px;
+  font-style: italic;
+  font-family: Georgia, 'Times New Roman', serif;
+  margin-left: 1px;
+  vertical-align: super;
+}
+
+/* Botón ENTER Emblemático HP Prime */
+.key-enter {
+  background: linear-gradient(180deg, #008be5 0%, #0060a8 100%);
+  color: #ffffff;
+  height: 46px;
+  border: 1px solid #0099ff;
+  box-shadow: 
+    0 3px 0 #003a66,
+    0 6px 10px rgba(0, 0, 0, 0.5),
+    0 0 15px var(--hp-blue-glow),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.key-enter-sub {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #bae6fd;
+  margin-bottom: 2px;
+  line-height: 1;
+}
+
+.key-enter-main {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  line-height: 1;
+}
+
+.key-enter:hover {
+  background: linear-gradient(180deg, #029bf7 0%, #0070c4 100%);
+  box-shadow: 
+    0 4px 0 #003a66,
+    0 8px 14px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(0, 145, 234, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.key-enter:active, .key-enter.active-press {
+  transform: translateY(3px);
+  box-shadow: 
+    0 1px 0 #003a66,
+    0 3px 6px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+/* ==========================================================================
+   PIE DE LA CALCULADORA
+   ========================================================================== */
+.calculator-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding: 0 4px;
+}
+
+.footer-engraving {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #475569;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ==========================================================================
+   PANEL LATERAL: GUÍA DE ATAJOS Y PRODUCTIVIDAD
+   ========================================================================== */
+.quick-guide-panel {
+  background: rgba(30, 36, 48, 0.65);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 320px;
+  width: 100%;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.guide-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 12px;
+}
+
+.guide-icon {
+  font-size: 20px;
+}
+
+.guide-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.shortcuts-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shortcuts-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.shortcuts-list kbd {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #38bdf8;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.shortcuts-list span {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.guide-feature-box {
+  background: rgba(0, 119, 200, 0.1);
+  border: 1px solid rgba(0, 119, 200, 0.25);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.feature-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #38bdf8;
+  margin-bottom: 4px;
+}
+
+.guide-feature-box p {
+  font-size: 11.5px;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.guide-footer-badge {
+  font-size: 11px;
+  color: #64748b;
+  text-align: center;
+  font-style: italic;
+}
+
+/* ==========================================================================
+   TOAST DE NOTIFICACIÓN
+   ========================================================================== */
+.toast-notification {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #0f172a;
+  color: #f8fafc;
+  border: 1px solid #38bdf8;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.25);
+  padding: 10px 18px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  opacity: 0;
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.25s ease;
+  z-index: 1000;
+}
+
+.toast-notification.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ==========================================================================
+   RESPONSIVIDAD
+   ========================================================================== */
+@media (max-width: 820px) {
+  .calculator-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .quick-guide-panel {
+    max-width: 440px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 12px 8px;
+  }
+
+  .hp-calculator {
+    padding: 16px 14px 20px 14px;
+    border-radius: 20px;
+  }
+
+  .key-num, .key-operator {
+    height: 44px;
+  }
+
+  .key-enter, .key-fn-sqrt {
+    height: 48px;
+  }
+
+  .key-main {
+    font-size: 16px;
+  }
+
+  .key-num .key-main {
+    font-size: 17px;
+  }
+
+  .utility-row {
+    gap: 4px;
+  }
+
+  .key-pure-frac {
+    height: 40px;
+  }
+
+  .pure-dash-box {
+    width: 10px;
+    height: 7.5px;
+  }
+
+  .pure-frac-bar {
+    width: 14px;
+  }
+
+  .key-action-fn {
+    height: 48px;
+  }
+
+  .sub-units {
+    font-size: 7px;
+  }
+
+  .sub-c {
+    font-size: 8px;
+  }
+
+  .display-result {
+    font-size: 24px;
+  }
+}
