@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <div class="calculator-wrapper">
@@ -106,29 +106,20 @@
             </div>
           </div>
 
-          <!-- HP Prime Bottom Touch Softkeys -->
-          <div class="screen-softkeys" role="toolbar" aria-label="Teclas rápidas de pantalla">
-            <button type="button" class="softkey-btn" id="soft-clear-hist" title="Limpiar todo el historial">LIMPIAR</button>
-            <button type="button" class="softkey-btn" id="soft-frac" title="Plantilla de Fracción">□ / □</button>
-            <button type="button" class="softkey-btn" id="soft-sqrt" title="Plantilla de Raíz">ⁿ√□</button>
-            <button type="button" class="softkey-btn" id="soft-power" title="Plantilla de Potencia">□^□</button>
-            <button type="button" class="softkey-btn" id="soft-copy" title="Copiar resultado">COPIAR</button>
-          </div>
-
         </div>
       </section>
 
       <!-- KEYPAD SECTION -->
       <section class="keypad-chassis" aria-label="Teclado numérico y operaciones">
         
-        <!-- Top Utility Row (6 botones: control, navegación de recuadros y paréntesis) -->
+        <!-- Top Utility Row (6 botones: paréntesis a la izquierda, flechas al centro, AC y DEL a la derecha) -->
         <div class="keypad-row utility-row">
-          <button type="button" class="key-btn key-utility key-clear" id="key-clear" data-action="clear" aria-label="Borrar todo">
-            <span class="key-main">AC</span>
+          <button type="button" class="key-btn key-utility" id="key-paren-open" data-key="(" aria-label="Paréntesis que abre">
+            <span class="key-main">(</span>
           </button>
           
-          <button type="button" class="key-btn key-utility key-delete" id="key-delete" data-action="backspace" aria-label="Borrar último carácter">
-            <span class="key-main">DEL</span>
+          <button type="button" class="key-btn key-utility" id="key-paren-close" data-key=")" aria-label="Paréntesis que cierra">
+            <span class="key-main">)</span>
           </button>
 
           <button type="button" class="key-btn key-utility key-arrow key-arrow-left" id="key-arrow-left" data-action="arrow-left" title="Desplazarse a la izquierda (←)" aria-label="Flecha izquierda">
@@ -138,13 +129,13 @@
           <button type="button" class="key-btn key-utility key-arrow key-arrow-right" id="key-arrow-right" data-action="arrow-right" title="Desplazarse a la derecha (→)" aria-label="Flecha derecha">
             <span class="key-main">▶</span>
           </button>
-          
-          <button type="button" class="key-btn key-utility" id="key-paren-open" data-key="(" aria-label="Paréntesis que abre">
-            <span class="key-main">(</span>
+
+          <button type="button" class="key-btn key-utility key-clear" id="key-clear" data-action="clear" aria-label="Borrar todo">
+            <span class="key-main">AC</span>
           </button>
           
-          <button type="button" class="key-btn key-utility" id="key-paren-close" data-key=")" aria-label="Paréntesis que cierra">
-            <span class="key-main">)</span>
+          <button type="button" class="key-btn key-utility key-delete" id="key-delete" data-action="backspace" aria-label="Borrar último carácter">
+            <span class="key-main">DEL</span>
           </button>
         </div>
 
@@ -290,7 +281,7 @@
     <span class="toast-message" id="toast-message">Copiado al portapapeles</span>
   </div>
 
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

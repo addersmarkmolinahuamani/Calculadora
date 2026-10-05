@@ -47,12 +47,6 @@ class HPPrimeCalculator {
       btnCopyResult: document.getElementById('btn-copy-result'),
       toast: document.getElementById('toast-notification'),
       toastMessage: document.getElementById('toast-message'),
-      // Softkeys de pantalla
-      softClearHist: document.getElementById('soft-clear-hist'),
-      softFrac: document.getElementById('soft-frac'),
-      softSqrt: document.getElementById('soft-sqrt'),
-      softPower: document.getElementById('soft-power'),
-      softCopy: document.getElementById('soft-copy'),
       badgeFracMode: document.getElementById('badge-frac-mode'),
     };
 
@@ -238,12 +232,37 @@ class HPPrimeCalculator {
     if (!this.activeTarget) {
       return this.items;
     }
+    if (this.activeTarget.type === 'gap') {
+      if (!this.activeTarget.parentId) {
+        return this.items;
+      }
+      const info = this.findNodeAndParent(this.activeTarget.parentId);
+      if (!info || !info.node) return this.items;
+      return info.node[this.activeTarget.slot];
+    }
     const info = this.findNodeAndParent(this.activeTarget.id);
     if (!info || !info.node) {
       this.activeTarget = null;
       return this.items;
     }
     return info.node[this.activeTarget.slot];
+  }
+
+  /**
+   * Inserta un nodo (plantilla o texto) en la posición activa, respetando los espacios (gaps)
+   */
+  insertNodeIntoActiveList(node) {
+    const list = this.getActiveList();
+    if (this.activeTarget && this.activeTarget.type === 'gap') {
+      const idx = typeof this.activeTarget.index === 'number' ? this.activeTarget.index : list.length;
+      if (idx < list.length) {
+        list.splice(idx, 0, node);
+      } else {
+        list.push(node);
+      }
+      return;
+    }
+    list.push(node);
   }
 
   /**
@@ -291,7 +310,7 @@ class HPPrimeCalculator {
       den: []
     };
 
-    list.push(newFrac);
+    this.insertNodeIntoActiveList(newFrac);
 
     if (initialNum !== '') {
       this.activeTarget = { id: newFrac.id, slot: 'den' };
@@ -315,8 +334,6 @@ class HPPrimeCalculator {
       this.clearAll(false);
     }
 
-    const list = this.getActiveList();
-
     this.templateCounter++;
     const newRad = {
       type: 'radical',
@@ -325,7 +342,7 @@ class HPPrimeCalculator {
       radicand: []
     };
 
-    list.push(newRad);
+    this.insertNodeIntoActiveList(newRad);
 
     // Enfocar radicando para que el usuario escriba dentro de la raíz
     this.activeTarget = { id: newRad.id, slot: 'radicand' };
@@ -356,7 +373,7 @@ class HPPrimeCalculator {
       exp: []
     };
 
-    list.push(newPow);
+    this.insertNodeIntoActiveList(newPow);
 
     if (initialBase !== '') {
       this.activeTarget = { id: newPow.id, slot: 'exp' };
@@ -388,88 +405,173 @@ class HPPrimeCalculator {
   }
 
   /**
-   * Obtiene todos los recuadros editables en orden visual de lectura (de izquierda a derecha)
+   * Obtiene todas las paradas navegables (recuadros y espacios intermedios entre plantillas)
+   * en orden visual de lectura (de izquierda a derecha).
    */
-  getAllFocusableSlots(items = this.items) {
-    const slots = [];
-    const traverse = (list) => {
-      for (const item of list) {
+  getAllNavigableStops(items = this.items) {
+    const stops = [];
+
+    const traverseList = (list, parentId = null, slotName = null) => {
+      if (!list || list.length === 0) return;
+
+      for (let i = 0; i < list.length; i++) {
+        const item = list[i];
+        const prevItem = i > 0 ? list[i - 1] : null;
+
+        // 1. Espacios (gaps) antes de plantillas o entre plantillas
+        if (i === 0) {
+          if (item.type !== 'text') {
+            stops.push({
+              type: 'gap',
+              parentId,
+              slot: slotName,
+              index: 0,
+              label: parentId ? 'Inicio de casilla' : 'Inicio de la expresión'
+            });
+          }
+        } else {
+          if (item.type !== 'text') {
+            stops.push({
+              type: 'gap',
+              parentId,
+              slot: slotName,
+              index: i,
+              label: prevItem.type !== 'text' ? 'Espacio entre plantillas' : 'Espacio de operador'
+            });
+          }
+        }
+
+        // 2. Recuadros interactivos de cada plantilla
         if (item.type === 'fraction') {
-          slots.push({ id: item.id, slot: 'num', label: 'Numerador' });
-          traverse(item.num);
-          slots.push({ id: item.id, slot: 'den', label: 'Denominador' });
-          traverse(item.den);
+          const hasChildTemplatesNum = item.num.some(it => it.type !== 'text');
+          if (!hasChildTemplatesNum) {
+            stops.push({ id: item.id, slot: 'num', type: 'slot', label: 'Numerador' });
+          }
+          traverseList(item.num, item.id, 'num');
+
+          const hasChildTemplatesDen = item.den.some(it => it.type !== 'text');
+          if (!hasChildTemplatesDen) {
+            stops.push({ id: item.id, slot: 'den', type: 'slot', label: 'Denominador' });
+          }
+          traverseList(item.den, item.id, 'den');
         } else if (item.type === 'radical') {
-          slots.push({ id: item.id, slot: 'index', label: 'Índice del radical' });
-          traverse(item.index);
-          slots.push({ id: item.id, slot: 'radicand', label: 'Radicando (dentro de la raíz)' });
-          traverse(item.radicand);
+          const hasChildTemplatesIdx = item.index.some(it => it.type !== 'text');
+          if (!hasChildTemplatesIdx) {
+            stops.push({ id: item.id, slot: 'index', type: 'slot', label: 'Índice del radical' });
+          }
+          traverseList(item.index, item.id, 'index');
+
+          const hasChildTemplatesRad = item.radicand.some(it => it.type !== 'text');
+          if (!hasChildTemplatesRad) {
+            stops.push({ id: item.id, slot: 'radicand', type: 'slot', label: 'Radicando (dentro de la raíz)' });
+          }
+          traverseList(item.radicand, item.id, 'radicand');
         } else if (item.type === 'power') {
-          slots.push({ id: item.id, slot: 'base', label: 'Base' });
-          traverse(item.base);
-          slots.push({ id: item.id, slot: 'exp', label: 'Exponente' });
-          traverse(item.exp);
+          const hasChildTemplatesBase = item.base.some(it => it.type !== 'text');
+          if (!hasChildTemplatesBase) {
+            stops.push({ id: item.id, slot: 'base', type: 'slot', label: 'Base' });
+          }
+          traverseList(item.base, item.id, 'base');
+
+          const hasChildTemplatesExp = item.exp.some(it => it.type !== 'text');
+          if (!hasChildTemplatesExp) {
+            stops.push({ id: item.id, slot: 'exp', type: 'slot', label: 'Exponente' });
+          }
+          traverseList(item.exp, item.id, 'exp');
         }
       }
+
+      // Espacio después de la última plantilla en la lista
+      const lastItem = list[list.length - 1];
+      if (lastItem && lastItem.type !== 'text') {
+        stops.push({
+          type: 'gap',
+          parentId,
+          slot: slotName,
+          index: list.length,
+          label: parentId ? 'Final de casilla' : 'Final de la expresión'
+        });
+      }
     };
-    traverse(items);
-    return slots;
+
+    traverseList(items, null, null);
+    return stops;
+  }
+
+  getAllFocusableSlots(items = this.items) {
+    return this.getAllNavigableStops(items);
+  }
+
+  isCurrentTarget(stop, target) {
+    if (!target) {
+      return stop.type === 'gap' && !stop.parentId && stop.index === this.items.length;
+    }
+    if (target.type === 'gap') {
+      return stop.type === 'gap' &&
+             (stop.parentId || null) === (target.parentId || null) &&
+             (stop.slot || null) === (target.slot || null) &&
+             stop.index === target.index;
+    }
+    return stop.type === 'slot' && stop.id === target.id && stop.slot === target.slot;
+  }
+
+  applyStop(stop) {
+    if (!stop) return;
+    if (stop.type === 'gap') {
+      if (!stop.parentId && stop.index === this.items.length) {
+        this.activeTarget = null;
+        this.showToast('Línea principal (final)');
+      } else {
+        this.activeTarget = {
+          type: 'gap',
+          parentId: stop.parentId || null,
+          slot: stop.slot || null,
+          index: stop.index
+        };
+        this.showToast(stop.label || 'Espacio entre plantillas');
+      }
+    } else {
+      this.activeTarget = { id: stop.id, slot: stop.slot };
+      this.showToast(stop.label || 'Casilla activa');
+    }
   }
 
   /**
-   * Navega fluidamente entre recuadros punteados y niveles de anidación (izquierda/derecha/arriba/abajo)
+   * Navega fluidamente entre recuadros punteados y espacios intermedios (izquierda/derecha/arriba/abajo)
    */
   navigateSlot(direction) {
     this.playKeySound('slot');
 
-    const slots = this.getAllFocusableSlots();
-    if (slots.length === 0) {
+    const stops = this.getAllNavigableStops();
+    if (stops.length === 0) {
       this.showToast('Línea principal');
       return;
     }
 
     if (direction === 'left' || direction === 'prev') {
-      if (!this.activeTarget) {
-        // Entrar al último recuadro de la derecha
-        const target = slots[slots.length - 1];
-        this.activeTarget = { id: target.id, slot: target.slot };
-        this.showToast(target.label);
+      const currIndex = stops.findIndex(s => this.isCurrentTarget(s, this.activeTarget));
+      if (currIndex > 0) {
+        this.applyStop(stops[currIndex - 1]);
+      } else if (currIndex === -1) {
+        this.applyStop(stops[stops.length - 1]);
       } else {
-        const currIndex = slots.findIndex(s => s.id === this.activeTarget.id && s.slot === this.activeTarget.slot);
-        if (currIndex > 0) {
-          const target = slots[currIndex - 1];
-          this.activeTarget = { id: target.id, slot: target.slot };
-          this.showToast(target.label);
-        } else {
-          // Salir a la izquierda (línea principal antes de la plantilla)
-          this.activeTarget = null;
-          this.showToast('Línea principal (inicio)');
-        }
+        // En la primera parada (índice 0)
+        this.applyStop(stops[0]);
       }
     } else if (direction === 'right' || direction === 'next' || direction === 'exit') {
-      if (!this.activeTarget) {
-        // Entrar al primer recuadro de la izquierda
-        const target = slots[0];
-        this.activeTarget = { id: target.id, slot: target.slot };
-        this.showToast(target.label);
+      const currIndex = stops.findIndex(s => this.isCurrentTarget(s, this.activeTarget));
+      if (currIndex !== -1 && currIndex < stops.length - 1) {
+        this.applyStop(stops[currIndex + 1]);
+      } else if (currIndex === -1) {
+        this.applyStop(stops[0]);
       } else {
-        const currIndex = slots.findIndex(s => s.id === this.activeTarget.id && s.slot === this.activeTarget.slot);
-        if (currIndex !== -1 && currIndex < slots.length - 1) {
-          const target = slots[currIndex + 1];
-          this.activeTarget = { id: target.id, slot: target.slot };
-          this.showToast(target.label);
-        } else {
-          // Salir a la derecha (línea principal después de la plantilla)
-          this.activeTarget = null;
-          this.showToast('Línea principal (final)');
-        }
+        this.activeTarget = null;
+        this.showToast('Línea principal (final)');
       }
     } else if (direction === 'up' || direction === 'down' || direction === 'toggle') {
-      // Navegación vertical contextual (numerador <-> denominador, etc.)
-      if (!this.activeTarget) {
-        const target = direction === 'up' ? slots[slots.length - 1] : slots[0];
-        this.activeTarget = { id: target.id, slot: target.slot };
-        this.showToast(target.label);
+      if (!this.activeTarget || this.activeTarget.type === 'gap') {
+        const target = direction === 'up' ? stops[stops.length - 1] : stops[0];
+        this.applyStop(target);
       } else {
         const info = this.findNodeAndParent(this.activeTarget.id);
         if (info && info.node) {
@@ -511,6 +613,64 @@ class HPPrimeCalculator {
       }
       this.activeTarget = null;
       this.isEvaluated = false;
+      this.updateDisplay();
+      return;
+    }
+
+    // Manejo de entrada cuando el cursor está en un espacio intermedio (gap)
+    if (this.activeTarget && this.activeTarget.type === 'gap') {
+      const list = this.getActiveList();
+      let gapIdx = typeof this.activeTarget.index === 'number' ? this.activeTarget.index : list.length;
+      if (gapIdx > list.length) gapIdx = list.length;
+
+      // 1. Operador aritmético (+, -, *, /)
+      if (this.isOperator(char)) {
+        if (gapIdx > 0 && list[gapIdx - 1].type === 'text') {
+          const prevText = list[gapIdx - 1];
+          const trimmed = prevText.val.trim();
+          const lastChar = trimmed.slice(-1);
+          if (this.isOperator(lastChar)) {
+            prevText.val = trimmed.slice(0, -1) + ' ' + char + ' ';
+            this.updateDisplay();
+            return;
+          } else {
+            prevText.val += ' ' + char + ' ';
+            this.updateDisplay();
+            return;
+          }
+        } else {
+          const opStr = (char === '-' && (gapIdx === 0 || (gapIdx > 0 && list[gapIdx - 1].type !== 'text'))) ? '-' : (' ' + char + ' ');
+          list.splice(gapIdx, 0, { type: 'text', val: opStr });
+          this.activeTarget.index = gapIdx + 1;
+          this.updateDisplay();
+          return;
+        }
+      }
+
+      // 2. Punto decimal (.)
+      if (char === '.') {
+        if (gapIdx > 0 && list[gapIdx - 1].type === 'text') {
+          const prevText = list[gapIdx - 1];
+          if (!prevText.val.includes('.')) {
+            prevText.val += '.';
+            this.updateDisplay();
+            return;
+          }
+        } else {
+          list.splice(gapIdx, 0, { type: 'text', val: '0.' });
+          this.activeTarget.index = gapIdx + 1;
+          this.updateDisplay();
+          return;
+        }
+      }
+
+      // 3. Dígitos y otros símbolos (números, paréntesis)
+      if (gapIdx > 0 && list[gapIdx - 1].type === 'text' && !this.isOperator(list[gapIdx - 1].val.trim().slice(-1))) {
+        list[gapIdx - 1].val += char;
+      } else {
+        list.splice(gapIdx, 0, { type: 'text', val: char });
+        this.activeTarget.index = gapIdx + 1;
+      }
       this.updateDisplay();
       return;
     }
@@ -595,6 +755,45 @@ class HPPrimeCalculator {
       return;
     }
 
+    // Borrado inteligente cuando se está en un espacio intermedio (gap)
+    if (this.activeTarget && this.activeTarget.type === 'gap') {
+      const list = this.getActiveList();
+      let gapIdx = typeof this.activeTarget.index === 'number' ? this.activeTarget.index : list.length;
+      if (gapIdx > list.length) gapIdx = list.length;
+
+      if (gapIdx > 0) {
+        const itemToLeft = list[gapIdx - 1];
+        if (itemToLeft.type === 'text') {
+          const trimmed = itemToLeft.val.trimEnd();
+          if (trimmed.length > 0) {
+            itemToLeft.val = trimmed.slice(0, -1).trimEnd();
+          } else {
+            itemToLeft.val = '';
+          }
+          if (itemToLeft.val === '' || itemToLeft.val.trim() === '') {
+            list.splice(gapIdx - 1, 1);
+            this.activeTarget.index = Math.max(0, gapIdx - 1);
+          }
+          this.updateDisplay();
+          return;
+        } else {
+          // El elemento a la izquierda es una plantilla: entrar a editar su última casilla
+          const lastSlot = itemToLeft.type === 'fraction' ? 'den' : (itemToLeft.type === 'power' ? 'exp' : 'radicand');
+          this.activeTarget = { id: itemToLeft.id, slot: lastSlot };
+          const labelMap = { den: 'Denominador', exp: 'Exponente', radicand: 'Radicando' };
+          this.showToast('Editando ' + (labelMap[lastSlot] || lastSlot));
+          this.updateDisplay();
+          return;
+        }
+      } else {
+        if (this.activeTarget.parentId) {
+          this.activeTarget = { id: this.activeTarget.parentId, slot: this.activeTarget.slot };
+          this.updateDisplay();
+        }
+        return;
+      }
+    }
+
     const list = this.getActiveList();
 
     if (list.length > 0) {
@@ -603,11 +802,11 @@ class HPPrimeCalculator {
       if (lastItem.type === 'text') {
         const trimmed = lastItem.val.trimEnd();
         if (trimmed.length > 0) {
-          lastItem.val = trimmed.slice(0, -1);
+          lastItem.val = trimmed.slice(0, -1).trimEnd();
         } else {
           lastItem.val = '';
         }
-        if (lastItem.val === '') {
+        if (lastItem.val === '' || lastItem.val.trim() === '') {
           list.pop();
         }
         this.updateDisplay();
@@ -822,12 +1021,35 @@ class HPPrimeCalculator {
   /* ==========================================================================
      ACTUALIZACIÓN VISUAL DE LA PANTALLA LCD (RENDER RECURSIVO)
      ========================================================================== */
-  renderItemList(list, containerEl) {
-    list.forEach(item => {
+  renderItemList(list, containerEl, parentId = null, slotName = null) {
+    const isThisListGap = this.activeTarget &&
+      this.activeTarget.type === 'gap' &&
+      (this.activeTarget.parentId || null) === parentId &&
+      (this.activeTarget.slot || null) === slotName;
+
+    // Si el cursor gap está en el inicio de esta lista
+    if (isThisListGap && this.activeTarget.index === 0) {
+      const gapCursor = document.createElement('span');
+      gapCursor.className = 'cursor-blink gap-cursor';
+      containerEl.appendChild(gapCursor);
+    }
+
+    list.forEach((item, idx) => {
       if (item.type === 'text') {
         const span = document.createElement('span');
         span.className = 'math-text-token';
         span.textContent = this.formatExpression(item.val);
+        span.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.activeTarget = {
+            type: 'gap',
+            parentId,
+            slot: slotName,
+            index: idx + 1
+          };
+          this.showToast('Espacio de operador');
+          this.updateDisplay();
+        });
         containerEl.appendChild(span);
       } else if (item.type === 'fraction') {
         const fracBlock = document.createElement('div');
@@ -842,7 +1064,7 @@ class HPPrimeCalculator {
         if (item.num.length === 0) {
           numSlot.innerHTML = '<span class="box-prompt">□</span>';
         } else {
-          this.renderItemList(item.num, numSlot);
+          this.renderItemList(item.num, numSlot, item.id, 'num');
         }
         if (isNumActive) {
           const cursor = document.createElement('span');
@@ -865,7 +1087,7 @@ class HPPrimeCalculator {
         if (item.den.length === 0) {
           denSlot.innerHTML = '<span class="box-prompt">□</span>';
         } else {
-          this.renderItemList(item.den, denSlot);
+          this.renderItemList(item.den, denSlot, item.id, 'den');
         }
         if (isDenActive) {
           const cursor = document.createElement('span');
@@ -895,7 +1117,7 @@ class HPPrimeCalculator {
         if (item.base.length === 0) {
           baseSlot.innerHTML = '<span class="box-prompt">□</span>';
         } else {
-          this.renderItemList(item.base, baseSlot);
+          this.renderItemList(item.base, baseSlot, item.id, 'base');
         }
         if (isBaseActive) {
           const cursor = document.createElement('span');
@@ -914,7 +1136,7 @@ class HPPrimeCalculator {
         if (item.exp.length === 0) {
           expSlot.innerHTML = '<span class="box-prompt">□</span>';
         } else {
-          this.renderItemList(item.exp, expSlot);
+          this.renderItemList(item.exp, expSlot, item.id, 'exp');
         }
         if (isExpActive) {
           const cursor = document.createElement('span');
@@ -946,7 +1168,7 @@ class HPPrimeCalculator {
         if (item.index.length === 0) {
           indexSlot.innerHTML = '<span class="box-prompt">□</span>';
         } else {
-          this.renderItemList(item.index, indexSlot);
+          this.renderItemList(item.index, indexSlot, item.id, 'index');
         }
         if (isIndexActive) {
           const cursor = document.createElement('span');
@@ -976,7 +1198,7 @@ class HPPrimeCalculator {
         if (item.radicand.length === 0) {
           radicandSlot.innerHTML = '<span class="box-prompt">□</span>';
         } else {
-          this.renderItemList(item.radicand, radicandSlot);
+          this.renderItemList(item.radicand, radicandSlot, item.id, 'radicand');
         }
         if (isRadActive) {
           const cursor = document.createElement('span');
@@ -996,6 +1218,13 @@ class HPPrimeCalculator {
         radBlock.appendChild(radBody);
         containerEl.appendChild(radBlock);
       }
+
+      // Si el cursor gap está inmediatamente después de este elemento
+      if (isThisListGap && this.activeTarget.index === idx + 1) {
+        const gapCursor = document.createElement('span');
+        gapCursor.className = 'cursor-blink gap-cursor';
+        containerEl.appendChild(gapCursor);
+      }
     });
   }
 
@@ -1013,9 +1242,9 @@ class HPPrimeCalculator {
       cursor.className = 'cursor-blink';
       this.dom.displayExpression.appendChild(cursor);
     } else {
-      this.renderItemList(this.items, this.dom.displayExpression);
+      this.renderItemList(this.items, this.dom.displayExpression, null, null);
 
-      // Si el cursor está en la línea principal
+      // Si el cursor está en la línea principal al final y activeTarget === null
       if (this.activeTarget === null && !this.isEvaluated) {
         const mainCursor = document.createElement('span');
         mainCursor.className = 'cursor-blink';
@@ -1183,22 +1412,7 @@ class HPPrimeCalculator {
       this.showToast(`Modo: ${this.angleMode}`);
     });
 
-    // 3. Teclas Rápidas de Pantalla (Softkeys)
-    this.dom.softClearHist.addEventListener('click', () => this.clearHistory());
-    if (this.dom.softFrac) {
-      this.dom.softFrac.addEventListener('click', () => this.insertFractionTemplate());
-    }
-    const softSqrt = document.getElementById('soft-sqrt');
-    if (softSqrt) {
-      softSqrt.addEventListener('click', () => this.insertRadicalTemplate());
-    }
-    const softPower = document.getElementById('soft-power');
-    if (softPower) {
-      softPower.addEventListener('click', () => this.insertPowerTemplate());
-    }
-    this.dom.softCopy.addEventListener('click', () => this.copyResultToClipboard());
-
-    // 4. Teclado Físico
+    // 3. Teclado Físico
     window.addEventListener('keydown', (e) => this.handlePhysicalKeyboard(e));
   }
 

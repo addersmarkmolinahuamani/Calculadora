@@ -786,6 +786,13 @@ body {
   box-shadow: 0 0 5px var(--hp-orange);
 }
 
+.cursor-blink.gap-cursor {
+  height: 24px;
+  width: 2.5px;
+  margin: 0 4px;
+  box-shadow: 0 0 8px var(--hp-orange);
+}
+
 @keyframes blinkCursor {
   0%, 49% { opacity: 1; }
   50%, 100% { opacity: 0; }
@@ -857,44 +864,15 @@ body {
   font-size: 18px;
   text-shadow: none;
 }
-
-/* ==========================================================================
-   TECLAS RÁPIDAS DE PANTALLA (TOUCH SOFTKEYS HP PRIME)
-   ========================================================================== */
-.screen-softkeys {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  background: #0f1520;
-  border-top: 1px solid var(--screen-border);
-  padding: 4px;
-  gap: 3px;
-}
-
-.softkey-btn {
-  background: var(--screen-softkey-bg);
-  border: 1px solid var(--screen-softkey-border);
-  color: #94a3b8;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  padding: 6px 2px;
-  border-radius: 4px;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.12s ease;
-  letter-spacing: 0.5px;
-}
-
-.softkey-btn:hover {
-  background: #1e293b;
-  color: #f1f5f9;
-  border-color: #38bdf8;
-}
-
-.softkey-btn:active {
-  background: #0284c7;
-  color: #ffffff;
-  transform: translateY(1px);
+/* Cursor parpadeante entre plantillas y elementos */
+.cursor-blink.gap-cursor {
+  display: inline-block;
+  width: 2.5px;
+  height: 24px;
+  vertical-align: middle;
+  background-color: var(--hp-orange);
+  box-shadow: 0 0 8px var(--hp-orange);
+  margin: 0 4px;
 }
 
 /* ==========================================================================
