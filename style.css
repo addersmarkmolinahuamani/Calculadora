@@ -1000,11 +1000,78 @@ body {
     inset 0 1px 1px rgba(255, 255, 255, 0.15);
 }
 
-/* 3. Fila Superior de Utilidad (AC, DEL, (, ), %) */
+/* 3. Fila Superior de Utilidad (AC, DEL, ◀, ▶, (, )) */
 .utility-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 6px;
+}
+
+/* Teclas de Flechas de Navegación (Inspiradas en el D-Pad HP Prime) */
+.key-arrow {
+  background: linear-gradient(145deg, #1e2636 0%, #111722 100%);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 
+    0 3px 0 #090d14,
+    0 4px 6px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.key-arrow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.key-arrow .key-main {
+  font-size: 15px;
+  color: var(--hp-cyan);
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+  transition: transform 0.08s ease, color 0.08s ease;
+}
+
+.key-arrow:hover {
+  filter: brightness(1.2);
+  border-color: var(--hp-cyan);
+  box-shadow: 
+    0 3px 0 #090d14,
+    0 4px 10px rgba(0, 229, 255, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25);
+}
+
+.key-arrow:hover .key-main {
+  color: #ffffff;
+  text-shadow: 0 0 12px var(--hp-cyan);
+  transform: scale(1.18);
+}
+
+.key-arrow:active, .key-arrow.active-press {
+  transform: translateY(2px);
+  box-shadow: 
+    0 1px 0 #090d14,
+    0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.key-arrow-left .key-main {
+  margin-right: 1px;
+}
+
+.key-arrow-right .key-main {
+  margin-left: 1px;
+}
+
+/* Tecla Cero Ancha (Span 2) para llenar la fila 4 al eliminar ± */
+.key-zero {
+  grid-column: span 2;
 }
 
 /* ==========================================================================

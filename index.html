@@ -121,7 +121,7 @@
       <!-- KEYPAD SECTION -->
       <section class="keypad-chassis" aria-label="Teclado numérico y operaciones">
         
-        <!-- Top Utility Row (5 botones estándar de utilidad) -->
+        <!-- Top Utility Row (6 botones: control, navegación de recuadros y paréntesis) -->
         <div class="keypad-row utility-row">
           <button type="button" class="key-btn key-utility key-clear" id="key-clear" data-action="clear" aria-label="Borrar todo">
             <span class="key-main">AC</span>
@@ -130,6 +130,14 @@
           <button type="button" class="key-btn key-utility key-delete" id="key-delete" data-action="backspace" aria-label="Borrar último carácter">
             <span class="key-main">DEL</span>
           </button>
+
+          <button type="button" class="key-btn key-utility key-arrow key-arrow-left" id="key-arrow-left" data-action="arrow-left" title="Desplazarse a la izquierda (←)" aria-label="Flecha izquierda">
+            <span class="key-main">◀</span>
+          </button>
+
+          <button type="button" class="key-btn key-utility key-arrow key-arrow-right" id="key-arrow-right" data-action="arrow-right" title="Desplazarse a la derecha (→)" aria-label="Flecha derecha">
+            <span class="key-main">▶</span>
+          </button>
           
           <button type="button" class="key-btn key-utility" id="key-paren-open" data-key="(" aria-label="Paréntesis que abre">
             <span class="key-main">(</span>
@@ -137,10 +145,6 @@
           
           <button type="button" class="key-btn key-utility" id="key-paren-close" data-key=")" aria-label="Paréntesis que cierra">
             <span class="key-main">)</span>
-          </button>
-
-          <button type="button" class="key-btn key-utility key-operator" id="key-percent" data-action="percent" aria-label="Porcentaje">
-            <span class="key-main">%</span>
           </button>
         </div>
 
@@ -190,14 +194,11 @@
           </button>
 
           <!-- Row 4 -->
-          <button type="button" class="key-btn key-num" id="key-0" data-key="0">
+          <button type="button" class="key-btn key-num key-zero" id="key-0" data-key="0" aria-label="Cero">
             <span class="key-main">0</span>
           </button>
           <button type="button" class="key-btn key-num" id="key-dot" data-key="." aria-label="Punto decimal">
             <span class="key-main">.</span>
-          </button>
-          <button type="button" class="key-btn key-num" id="key-sign" data-action="sign" aria-label="Cambiar signo">
-            <span class="key-main">±</span>
           </button>
           <button type="button" class="key-btn key-operator" id="key-add" data-key="+" aria-label="Sumar">
             <span class="key-main">+</span>
@@ -259,7 +260,7 @@
         <li><kbd>Backspace</kbd> <span>Borrar un dígito</span></li>
         <li><kbd>Esc</kbd> o <kbd>C</kbd> <span>Borrar todo (AC)</span></li>
         <li><kbd>(</kbd> y <kbd>)</kbd> <span>Paréntesis para orden de operaciones</span></li>
-        <li><kbd>%</kbd> <span>Calcular porcentaje</span></li>
+        <li><kbd>◀</kbd> y <kbd>▶</kbd> <span>Navegar entre recuadros punteados (← / →)</span></li>
         <li><kbd>F</kbd> o botón <kbd>□/□</kbd> <span>Plantilla de fracción</span></li>
         <li><kbd>R</kbd> o botón <kbd>ⁿ√□</kbd> <span>Plantilla de raíz (índice y radicando)</span></li>
         <li><kbd>^</kbd> o botón <kbd>□^□</kbd> <span>Plantilla de potencia (base y exponente)</span></li>

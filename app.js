@@ -388,108 +388,104 @@ class HPPrimeCalculator {
   }
 
   /**
-   * Navega fluidamente entre recuadros y niveles de anidación
+   * Obtiene todos los recuadros editables en orden visual de lectura (de izquierda a derecha)
+   */
+  getAllFocusableSlots(items = this.items) {
+    const slots = [];
+    const traverse = (list) => {
+      for (const item of list) {
+        if (item.type === 'fraction') {
+          slots.push({ id: item.id, slot: 'num', label: 'Numerador' });
+          traverse(item.num);
+          slots.push({ id: item.id, slot: 'den', label: 'Denominador' });
+          traverse(item.den);
+        } else if (item.type === 'radical') {
+          slots.push({ id: item.id, slot: 'index', label: 'Índice del radical' });
+          traverse(item.index);
+          slots.push({ id: item.id, slot: 'radicand', label: 'Radicando (dentro de la raíz)' });
+          traverse(item.radicand);
+        } else if (item.type === 'power') {
+          slots.push({ id: item.id, slot: 'base', label: 'Base' });
+          traverse(item.base);
+          slots.push({ id: item.id, slot: 'exp', label: 'Exponente' });
+          traverse(item.exp);
+        }
+      }
+    };
+    traverse(items);
+    return slots;
+  }
+
+  /**
+   * Navega fluidamente entre recuadros punteados y niveles de anidación (izquierda/derecha/arriba/abajo)
    */
   navigateSlot(direction) {
     this.playKeySound('slot');
 
-    if (!this.activeTarget) {
-      if (direction === 'up' || direction === 'prev' || direction === 'left') {
-        const lastTemplate = [...this.items].reverse().find(it => it.type !== 'text');
-        if (lastTemplate) {
-          if (lastTemplate.type === 'fraction') {
-            this.activeTarget = { id: lastTemplate.id, slot: 'den' };
-          } else if (lastTemplate.type === 'power') {
-            this.activeTarget = { id: lastTemplate.id, slot: 'exp' };
-          } else if (lastTemplate.type === 'radical') {
-            this.activeTarget = { id: lastTemplate.id, slot: 'radicand' };
+    const slots = this.getAllFocusableSlots();
+    if (slots.length === 0) {
+      this.showToast('Línea principal');
+      return;
+    }
+
+    if (direction === 'left' || direction === 'prev') {
+      if (!this.activeTarget) {
+        // Entrar al último recuadro de la derecha
+        const target = slots[slots.length - 1];
+        this.activeTarget = { id: target.id, slot: target.slot };
+        this.showToast(target.label);
+      } else {
+        const currIndex = slots.findIndex(s => s.id === this.activeTarget.id && s.slot === this.activeTarget.slot);
+        if (currIndex > 0) {
+          const target = slots[currIndex - 1];
+          this.activeTarget = { id: target.id, slot: target.slot };
+          this.showToast(target.label);
+        } else {
+          // Salir a la izquierda (línea principal antes de la plantilla)
+          this.activeTarget = null;
+          this.showToast('Línea principal (inicio)');
+        }
+      }
+    } else if (direction === 'right' || direction === 'next' || direction === 'exit') {
+      if (!this.activeTarget) {
+        // Entrar al primer recuadro de la izquierda
+        const target = slots[0];
+        this.activeTarget = { id: target.id, slot: target.slot };
+        this.showToast(target.label);
+      } else {
+        const currIndex = slots.findIndex(s => s.id === this.activeTarget.id && s.slot === this.activeTarget.slot);
+        if (currIndex !== -1 && currIndex < slots.length - 1) {
+          const target = slots[currIndex + 1];
+          this.activeTarget = { id: target.id, slot: target.slot };
+          this.showToast(target.label);
+        } else {
+          // Salir a la derecha (línea principal después de la plantilla)
+          this.activeTarget = null;
+          this.showToast('Línea principal (final)');
+        }
+      }
+    } else if (direction === 'up' || direction === 'down' || direction === 'toggle') {
+      // Navegación vertical contextual (numerador <-> denominador, etc.)
+      if (!this.activeTarget) {
+        const target = direction === 'up' ? slots[slots.length - 1] : slots[0];
+        this.activeTarget = { id: target.id, slot: target.slot };
+        this.showToast(target.label);
+      } else {
+        const info = this.findNodeAndParent(this.activeTarget.id);
+        if (info && info.node) {
+          const { node } = info;
+          const slot = this.activeTarget.slot;
+          if (node.type === 'fraction') {
+            this.activeTarget.slot = slot === 'num' ? 'den' : 'num';
+            this.showToast(this.activeTarget.slot === 'num' ? 'Numerador' : 'Denominador');
+          } else if (node.type === 'radical') {
+            this.activeTarget.slot = slot === 'radicand' ? 'index' : 'radicand';
+            this.showToast(this.activeTarget.slot === 'index' ? 'Índice del radical' : 'Radicando');
+          } else if (node.type === 'power') {
+            this.activeTarget.slot = slot === 'base' ? 'exp' : 'base';
+            this.showToast(this.activeTarget.slot === 'base' ? 'Base' : 'Exponente');
           }
-          this.updateDisplay();
         }
-      }
-      return;
-    }
-
-    const info = this.findNodeAndParent(this.activeTarget.id);
-    if (!info) {
-      this.activeTarget = null;
-      this.updateDisplay();
-      return;
-    }
-
-    const { node, parent, parentSlot } = info;
-    const slot = this.activeTarget.slot;
-
-    if (node.type === 'fraction') {
-      if (direction === 'down' || direction === 'toggle') {
-        if (slot === 'num') {
-          this.activeTarget.slot = 'den';
-          this.showToast('Denominador');
-        } else if (direction === 'toggle') {
-          this.activeTarget.slot = 'num';
-          this.showToast('Numerador');
-        }
-      } else if (direction === 'up') {
-        if (slot === 'den') {
-          this.activeTarget.slot = 'num';
-          this.showToast('Numerador');
-        }
-      } else if (direction === 'next' || direction === 'exit' || direction === 'right') {
-        if (slot === 'num') {
-          this.activeTarget.slot = 'den';
-          this.showToast('Denominador');
-        } else {
-          // Salir al contenedor padre
-          this.activeTarget = parent ? { id: parent.id, slot: parentSlot } : null;
-          this.showToast(parent ? 'En recuadro anterior' : 'Fuera de la fracción');
-        }
-      } else if (direction === 'prev' || direction === 'left') {
-        if (slot === 'den') {
-          this.activeTarget.slot = 'num';
-          this.showToast('Numerador');
-        } else {
-          this.activeTarget = parent ? { id: parent.id, slot: parentSlot } : null;
-        }
-      }
-    } else if (node.type === 'power') {
-      if (direction === 'up' || direction === 'next' || direction === 'right' || direction === 'exit') {
-        if (slot === 'base') {
-          this.activeTarget.slot = 'exp';
-          this.showToast('Exponente');
-        } else {
-          this.activeTarget = parent ? { id: parent.id, slot: parentSlot } : null;
-          this.showToast(parent ? 'En recuadro anterior' : 'Fuera de la potencia');
-        }
-      } else if (direction === 'down' || direction === 'prev' || direction === 'left') {
-        if (slot === 'exp') {
-          this.activeTarget.slot = 'base';
-          this.showToast('Base');
-        } else {
-          this.activeTarget = parent ? { id: parent.id, slot: parentSlot } : null;
-        }
-      } else if (direction === 'toggle') {
-        this.activeTarget.slot = slot === 'base' ? 'exp' : 'base';
-        this.showToast(this.activeTarget.slot === 'base' ? 'Base' : 'Exponente');
-      }
-    } else if (node.type === 'radical') {
-      if (direction === 'up' || direction === 'left') {
-        if (slot === 'radicand') {
-          this.activeTarget.slot = 'index';
-          this.showToast('Índice del radical');
-        } else {
-          this.activeTarget = parent ? { id: parent.id, slot: parentSlot } : null;
-        }
-      } else if (direction === 'down' || direction === 'right' || direction === 'next' || direction === 'exit') {
-        if (slot === 'index') {
-          this.activeTarget.slot = 'radicand';
-          this.showToast('Radicando');
-        } else {
-          this.activeTarget = parent ? { id: parent.id, slot: parentSlot } : null;
-          this.showToast(parent ? 'En recuadro anterior' : 'Fuera de la raíz');
-        }
-      } else if (direction === 'toggle') {
-        this.activeTarget.slot = slot === 'radicand' ? 'index' : 'radicand';
-        this.showToast(this.activeTarget.slot === 'radicand' ? 'Radicando' : 'Índice del radical');
       }
     }
 
@@ -1226,6 +1222,12 @@ class HPPrimeCalculator {
       case 'power':
         this.insertPowerTemplate();
         break;
+      case 'arrow-left':
+        this.navigateSlot('left');
+        break;
+      case 'arrow-right':
+        this.navigateSlot('right');
+        break;
       case 'sign':
         this.toggleSign();
         break;
@@ -1283,10 +1285,12 @@ class HPPrimeCalculator {
       this.navigateSlot('up');
       e.preventDefault();
     } else if (e.key === 'ArrowRight' || e.key === 'Tab') {
-      this.navigateSlot('next');
+      matchedButtonId = 'key-arrow-right';
+      this.navigateSlot('right');
       e.preventDefault();
     } else if (e.key === 'ArrowLeft') {
-      this.navigateSlot('prev');
+      matchedButtonId = 'key-arrow-left';
+      this.navigateSlot('left');
       e.preventDefault();
     } else if (e.key === '(') {
       matchedButtonId = 'key-paren-open';
@@ -1297,7 +1301,6 @@ class HPPrimeCalculator {
       this.appendCharacter(')');
       e.preventDefault();
     } else if (e.key === '%') {
-      matchedButtonId = 'key-percent';
       this.applyPercent();
       e.preventDefault();
     } else if (e.key === 'Enter' || e.key === '=') {
