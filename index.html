@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
   <div class="calculator-wrapper">
@@ -134,8 +134,14 @@
             <span class="key-main">AC</span>
           </button>
           
-          <button type="button" class="key-btn key-utility key-delete" id="key-delete" data-action="backspace" aria-label="Borrar último carácter">
-            <span class="key-main">DEL</span>
+          <button type="button" class="key-btn key-utility key-delete" id="key-delete" data-action="backspace" title="Borrar carácter (Backspace)" aria-label="Borrar carácter">
+            <span class="key-main">
+              <svg class="icon-backspace" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
+                <line x1="18" y1="9" x2="12" y2="15"></line>
+                <line x1="12" y1="9" x2="18" y2="15"></line>
+              </svg>
+            </span>
           </button>
         </div>
 
@@ -248,15 +254,14 @@
         <li><kbd>0</kbd>–<kbd>9</kbd> y <kbd>.</kbd> <span>Números y coma decimal</span></li>
         <li><kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd> <span>Operaciones básicas</span></li>
         <li><kbd>Enter</kbd> o <kbd>=</kbd> <span>Calcular resultado</span></li>
-        <li><kbd>Backspace</kbd> <span>Borrar un dígito</span></li>
+        <li><kbd>⌫</kbd> / <kbd>Backspace</kbd> <span>Borrar en la posición del cursor</span></li>
         <li><kbd>Esc</kbd> o <kbd>C</kbd> <span>Borrar todo (AC)</span></li>
-        <li><kbd>(</kbd> y <kbd>)</kbd> <span>Paréntesis para orden de operaciones</span></li>
-        <li><kbd>◀</kbd> y <kbd>▶</kbd> <span>Navegar entre recuadros punteados (← / →)</span></li>
+        <li><kbd>(</kbd> y <kbd>)</kbd> <span>Paréntesis (soporta multiplicación implícita)</span></li>
+        <li><kbd>◀</kbd> y <kbd>▶</kbd> <span>Mover cursor dígito a dígito o entre signos</span></li>
         <li><kbd>F</kbd> o botón <kbd>□/□</kbd> <span>Plantilla de fracción</span></li>
         <li><kbd>R</kbd> o botón <kbd>ⁿ√□</kbd> <span>Plantilla de raíz (índice y radicando)</span></li>
         <li><kbd>^</kbd> o botón <kbd>□^□</kbd> <span>Plantilla de potencia (base y exponente)</span></li>
-        <li><kbd>↓</kbd> / <kbd>↑</kbd> / <kbd>←</kbd> / <kbd>→</kbd> <span>Navegar entre recuadros</span></li>
-        <li><kbd>Tab</kbd> o clic en pantalla <span>Avanzar recuadro o salir</span></li>
+        <li><kbd>↓</kbd> / <kbd>↑</kbd> / <kbd>Clic</kbd> <span>Posicionar cursor en cualquier dígito o casilla</span></li>
       </ul>
 
       <div class="guide-feature-box">
@@ -281,7 +286,7 @@
     <span class="toast-message" id="toast-message">Copiado al portapapeles</span>
   </div>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=5"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
